@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Java开发网络爬虫系统</title>
+		<meta name="keywords" content="keyword1,keyword2,keyword3" />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="description" content="this is my page">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<link rel="stylesheet" type="text/css" href="css/jquery.lightbox-0.5.css">
+		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="js\jquery.lazyload.min.js"></script>
+		<script type="text/javascript" src="js\blocksit.min.js"></script>
+		<script type="text/javascript" src="js\jquery.lightbox-0.5.min.js"></script>
+		
+		<script type="text/javascript">
+			$(function(){
+				//都可以在页面加载完成后自动调用
+				
+				var pageNum = 0;
+				
+				//给按钮绑定事件
+				$("#getImgBtn").click(function(){
+					//alert("666666666666");
+					loadImages();
+				});
+				
+				//给下拉列表绑定一个change事件
+				$("#category").change(function(){
+					$("#container").html('');//清空
+					pageNum = 1;
+				});
+				
+				//回到顶部事件
+				$("#gotop").click(function(){
+					$("body,html").animate({scrollTop:0},500);
+				});
+				
+				//流式布局
+				function blockImages(){
+					$("#container").BlocksIt({
+						numOfCol:5//显示5列
+					});
+				}
+				//获取图片
+				function loadImages(){
+					var category = $("#category").val();
+					$.ajax({
+						url:"data.jsp",
+						type:"post",
+						data:{pageNum:pageNum, category:category},
+						dataType:"json",
+						success:function(data){
+							//动态的把图片加载到网页上
+							for(var i=0; i<data.length;i++){
+								var img = '';
+								img += "<div class='grid'><div class='imgholder'><img class='lazy'";
+								img += "src='images/pixel.gif' data-original='";
+								img += data[i].oriUrl;
+								img += "' width='175' /></div><strong>";
+								img += data[i].title;
+								img += "</strong><div class='meta'><a href='";
+								img += data[i].shortUrl;
+								img += "' class='lightbox'>高清无码图</a></div></div>"
+								//拼接
+								$("#container").append(img);
+							}
+							pageNum++;
+							$("a.lightbox").lightBox();
+							//流式布局
+							blockImages();
+							//图片加载
+							$("img.lazy").lazyload();
+						}
+					});
+				}
+				//给窗口绑定滚动事件
+				$(window).scroll(function(){
+					//当滚动到底部以上50像素的时候,就加载心的内容
+					if($(document).height() - $(this).scrollTop() - $(this).height() < 50){
+						loadImages();
+					}
+					if($(this).scrollTop() > 200){
+						$("#gotop").fadeIn(400);//淡入
+					}else{
+						$("#gotop").stop().fadeOut(400);//淡出
+					}
+				});
+			});
+			
+			
+		</script>
+	</head>
+
+	<body>
+		<div class="search">
+			<h1>Java开发网络爬虫系统</h1>
+			<div class="s_box">
+				<select id="category" class="s_txt">
+					<option value="fresh">小清新</option>
+					<option value="tui">美腿控</option>
+				</select>
+				<input type="button" value="确 定" class="btn" id="getImgBtn">
+			</div>
+		</div>
+		
+		<div id="wrapper">
+			<div id="container">
+				
+			</div>
+		</div>
+		<div id="gotop">
+		
+		</div>
+	</body>
+</html>
